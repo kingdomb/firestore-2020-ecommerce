@@ -7,7 +7,7 @@ export default function ProtectedRoute({ redirectTo = '/login' }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    // you can return a spinner here
+    // spinner here
     return <div>Loading...</div>;
   }
 
