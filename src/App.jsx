@@ -2,6 +2,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
+import Footer from './components/Footer'
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
@@ -34,6 +35,7 @@ export default function App() {
         {/* Fallback */}
         <Route path='*' element={<Home />} />
       </Routes>
+      <Footer />
     </>
   );
 }
