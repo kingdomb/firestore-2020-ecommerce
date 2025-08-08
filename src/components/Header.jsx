@@ -44,30 +44,22 @@ export default function Header() {
                   </NavLink>
                 </li>
                 <li>
-                  <a href='#' onClick={(e) => e.preventDefault()}>
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href='#' onClick={(e) => e.preventDefault()}>
-                    Contact
-                  </a>
-                </li>
-                <li>
                   <NavLink to='/account' onClick={() => setOpen(false)}>
                     Account
                   </NavLink>
                 </li>
-                <CartItem>
-                  <Link to='/cart' aria-label='Cart'>
-                    <img
-                      src='/images/cart.png'
-                      width='30'
-                      height='30'
-                      alt='Cart'
-                    />
-                  </Link>
-                </CartItem>
+                {user && (
+                  <CartItem>
+                    <Link to='/cart' aria-label='Cart'>
+                      <img
+                        src='/images/cart.png'
+                        width='30'
+                        height='30'
+                        alt='Cart'
+                      />
+                    </Link>
+                  </CartItem>
+                )}
               </ul>
             </Nav>
 
