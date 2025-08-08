@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Static HTML/CSS pages
+account.html
+cart.html
+index.html
+product-details.html
+products.html
+style.css
