@@ -1,185 +1,369 @@
 // firestore:src/pages/Cart.jsx
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 
-const CartWrapper = styled.div`
+/**
+ * Simple local-state cart UX so the page feels real.
+ * Hook this up to a CartContext later.
+ */
+
+const TAX_RATE = 0.175; // example: $200 * 17.5% = $35
+
+export default function Cart() {
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      title: 'Red Printed T-Shirt',
+      price: 50,
+      src: '/images/buy-1.jpg',
+      qty: 1,
+    },
+    {
+      id: 2,
+      title: 'HRX Sports Shoes',
+      price: 75,
+      src: '/images/buy-2.jpg',
+      qty: 1,
+    },
+    {
+      id: 3,
+      title: 'HRX Gray Trackpants',
+      price: 75,
+      src: '/images/buy-3.jpg',
+      qty: 1,
+    },
+  ]);
+
+  const changeQty = (id, nextQty) => {
+    const qty = Math.max(1, Number(nextQty) || 1);
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, qty } : it)));
+  };
+
+  const removeItem = (id) =>
+    setItems((prev) => prev.filter((it) => it.id !== id));
+
+  const { subtotal, tax, total } = useMemo(() => {
+    const sub = items.reduce((s, it) => s + it.price * it.qty, 0);
+    const t = +(sub * TAX_RATE).toFixed(2);
+    const tt = +(sub + t).toFixed(2);
+    return { subtotal: +sub.toFixed(2), tax: t, total: tt };
+  }, [items]);
+
+  const isEmpty = items.length === 0;
+
+  return (
+    <PageWrap>
+      <SmallContainer>
+        <HeaderRow>
+          <Title>Your Cart</Title>
+          {!isEmpty && <Continue to='/products'>Continue shopping →</Continue>}
+        </HeaderRow>
+
+        {isEmpty ? (
+          <EmptyState>
+            <h3>Your cart is empty</h3>
+            <p>Browse our latest products and add something you love.</p>
+            <PrimaryLink to='/products'>Shop products</PrimaryLink>
+          </EmptyState>
+        ) : (
+          <>
+            <ResponsiveTableWrapper>
+              <CartTable role='table' aria-label='Shopping cart'>
+                <thead>
+                  <tr>
+                    <TableHeader>Product</TableHeader>
+                    <TableHeader>Quantity</TableHeader>
+                    <TableHeader $align='right'>Subtotal</TableHeader>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((it) => (
+                    <tr key={it.id}>
+                      <TableCell>
+                        <CartInfo>
+                          <ProductImage src={it.src} alt={it.title} />
+                          <div>
+                            <p>{it.title}</p>
+                            <small>Price: ${it.price.toFixed(2)}</small>
+                            <br />
+                            <RemoveBtn
+                              type='button'
+                              onClick={() => removeItem(it.id)}
+                            >
+                              Remove
+                            </RemoveBtn>
+                          </div>
+                        </CartInfo>
+                      </TableCell>
+
+                      <TableCell>
+                        <QuantityInput
+                          type='number'
+                          min={1}
+                          value={it.qty}
+                          onChange={(e) => changeQty(it.id, e.target.value)}
+                          aria-label={`Quantity for ${it.title}`}
+                        />
+                      </TableCell>
+
+                      <TableCell align='right'>
+                        ${(it.price * it.qty).toFixed(2)}
+                      </TableCell>
+                    </tr>
+                  ))}
+                </tbody>
+              </CartTable>
+            </ResponsiveTableWrapper>
+
+            <TotalsRow>
+              <SummaryCard>
+                <SummaryRow>
+                  <span>Subtotal</span>
+                  <strong>${subtotal.toFixed(2)}</strong>
+                </SummaryRow>
+                <SummaryRow>
+                  <span>Tax</span>
+                  <strong>${tax.toFixed(2)}</strong>
+                </SummaryRow>
+                <Divider />
+                <SummaryRow $total>
+                  <span>Total</span>
+                  <strong>${total.toFixed(2)}</strong>
+                </SummaryRow>
+
+                <CheckoutButton as={Link} to='/checkout'>
+                  Proceed to checkout →
+                </CheckoutButton>
+              </SummaryCard>
+            </TotalsRow>
+          </>
+        )}
+      </SmallContainer>
+    </PageWrap>
+  );
+}
+
+//styled-components
+const PageWrap = styled.section`
+  margin: 40px 0 70px;
+`;
+
+const SmallContainer = styled.div`
   max-width: 1080px;
-  margin: 80px auto;
+  margin: auto;
   padding: 0 25px;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+
+const Title = styled.h2`
+  color: #555;
+`;
+
+const Continue = styled(Link)`
+  color: #ff523b;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const CartTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 `;
 
 const TableHeader = styled.th`
-  text-align: left;
-  padding: 5px;
+  text-align: ${({ align }) => align || 'left'};
+  padding: 12px 10px;
   color: #fff;
   background: #ff523b;
-  font-weight: normal;
-  &:last-child {
-    text-align: right;
-  }
+  font-weight: 600;
 `;
 
 const TableCell = styled.td`
-  padding: 10px 5px;
-  &:last-child {
-    text-align: right;
+  padding: 14px 10px;
+  vertical-align: top;
+  text-align: ${({ $align }) => $align || 'left'};
+
+  &:not(:last-child) {
+    border-right: 1px solid #f2f2f2;
   }
+  border-bottom: 1px solid #f2f2f2;
 `;
 
-const QuantityInput = styled.input`
-  width: 40px;
-  height: 30px;
-  padding: 5px;
+// Mobile-friendly table
+const ResponsiveTableWrapper = styled.div`
+  @media (max-width: 640px) {
+    ${CartTable} thead {
+      display: none;
+    }
+
+    ${CartTable} tr {
+      display: grid;
+      grid-template-columns: 1fr 80px; /* product / subtotal column */
+      gap: 8px;
+      padding: 12px;
+    }
+
+    ${TableCell} {
+      border: none !important;
+      padding: 6px 0;
+    }
+
+    ${TableCell}[align='right'] {
+      grid-column: 2 / 3;
+      justify-self: end;
+    }
+  }
 `;
 
 const CartInfo = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
 
-  @media (max-width: 600px) {
-    p {
-      display: none;
-    }
+  p {
+    color: #555;
+  }
+  small {
+    color: #777;
   }
 `;
 
 const ProductImage = styled.img`
   width: 80px;
   height: 80px;
-  margin-right: 10px;
+  border-radius: 12px;
+  object-fit: cover;
 `;
 
-const TotalWrapper = styled.div`
+const QuantityInput = styled.input`
+  width: 64px;
+  height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #e9e9e9;
+  border-radius: 10px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #ff523b;
+    box-shadow: 0 0 0 3px rgba(255, 82, 59, 0.15);
+  }
+`;
+
+const RemoveBtn = styled.button`
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #ff523b;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const TotalsRow = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
 `;
 
-const SummaryTable = styled.table`
-  border-top: 3px solid #ff523b;
+const SummaryCard = styled.div`
   width: 100%;
-  max-width: 350px;
-  border-collapse: collapse;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  border-top: 3px solid #ff523b;
+`;
+
+const SummaryRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 2px;
+  color: ${({ $total }) => ($total ? '#111' : '#555')};
+
+  strong {
+    font-weight: 700;
+  }
+`;
+
+const Divider = styled.hr`
+  border: none;
+  height: 1px;
+  background: #eee;
+  margin: 8px 0;
 `;
 
 const CheckoutButton = styled.a`
+  margin-top: 12px;
   display: inline-block;
+  width: 100%;
+  text-align: center;
+
   background: #ff523b;
   color: #fff;
-  padding: 8px 30px;
-  border-radius: 30px;
+  padding: 12px 18px;
+  border-radius: 9999px;
   text-decoration: none;
-  transition: background 0.5s;
+  font-weight: 700;
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: #563434;
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const EmptyState = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+
+  h3 {
+    color: #333;
+  }
+  p {
+    color: #777;
+    margin: 6px 0 14px;
+  }
+`;
+
+const PrimaryLink = styled(Link)`
+  background: #ff523b;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background: #563434;
   }
 `;
-
-export default function Cart() {
-  return (
-    <>
-      <Header />
-
-      <CartWrapper>
-        <CartTable>
-          <thead>
-            <tr>
-              <TableHeader>Product</TableHeader>
-              <TableHeader>Quantity</TableHeader>
-              <TableHeader>Subtotal</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <TableCell>
-                <CartInfo>
-                  <ProductImage src='/images/buy-1.jpg' alt='Product' />
-                  <div>
-                    <p>Red Printed T-Shirt</p>
-                    <small>Price: $50.00</small>
-                    <br />
-                    <a href=''>Remove</a>
-                  </div>
-                </CartInfo>
-              </TableCell>
-              <TableCell>
-                <QuantityInput type='number' defaultValue={1} />
-              </TableCell>
-              <TableCell>$50.00</TableCell>
-            </tr>
-            <tr>
-              <TableCell>
-                <CartInfo>
-                  <ProductImage src='/images/buy-2.jpg' alt='Product' />
-                  <div>
-                    <p>HRX Sports Shoes</p>
-                    <small>Price: $75.00</small>
-                    <br />
-                    <a href=''>Remove</a>
-                  </div>
-                </CartInfo>
-              </TableCell>
-              <TableCell>
-                <QuantityInput type='number' defaultValue={1} />
-              </TableCell>
-              <TableCell>$75.00</TableCell>
-            </tr>
-            <tr>
-              <TableCell>
-                <CartInfo>
-                  <ProductImage src='/images/buy-3.jpg' alt='Product' />
-                  <div>
-                    <p>HRX Gray Trackpants</p>
-                    <small>Price: $75.00</small>
-                    <br />
-                    <a href=''>Remove</a>
-                  </div>
-                </CartInfo>
-              </TableCell>
-              <TableCell>
-                <QuantityInput type='number' defaultValue={1} />
-              </TableCell>
-              <TableCell>$75.00</TableCell>
-            </tr>
-          </tbody>
-        </CartTable>
-
-        <TotalWrapper>
-          <SummaryTable>
-            <tbody>
-              <tr>
-                <TableCell>Subtotal</TableCell>
-                <TableCell>$200.00</TableCell>
-              </tr>
-              <tr>
-                <TableCell>Tax</TableCell>
-                <TableCell>$35.00</TableCell>
-              </tr>
-              <tr>
-                <TableCell>Total</TableCell>
-                <TableCell>$235.00</TableCell>
-              </tr>
-            </tbody>
-          </SummaryTable>
-        </TotalWrapper>
-
-        <TotalWrapper>
-          <CheckoutButton href='/checkout'>
-            Proceed to checkout →
-          </CheckoutButton>
-        </TotalWrapper>
-      </CartWrapper>
-
-      <Footer />
-    </>
-  );
-}

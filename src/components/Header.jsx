@@ -43,11 +43,13 @@ export default function Header() {
                     Products
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink to='/account' onClick={() => setOpen(false)}>
-                    Account
-                  </NavLink>
-                </li>
+                {user && (
+                  <li>
+                    <NavLink to='/account' onClick={() => setOpen(false)}>
+                      Account
+                    </NavLink>
+                  </li>
+                )}
                 {user && (
                   <CartItem>
                     <Link to='/cart' aria-label='Cart'>
