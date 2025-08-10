@@ -28,7 +28,9 @@ export default function Register() {
 
         <Form onSubmit={handleSubmit}>
           <Field>
-            <Label htmlFor='name'>Name</Label>
+            <Label htmlFor='name' $required>
+              Name
+            </Label>
             <Input
               id='name'
               type='text'
@@ -41,7 +43,9 @@ export default function Register() {
           </Field>
 
           <Field>
-            <Label htmlFor='email'>Email</Label>
+            <Label htmlFor='email' $required>
+              Email
+            </Label>
             <Input
               id='email'
               type='email'
@@ -54,7 +58,9 @@ export default function Register() {
           </Field>
 
           <Field>
-            <Label htmlFor='password'>Password</Label>
+            <Label htmlFor='password' $required>
+              Password
+            </Label>
             <PasswordInput
               id='password'
               value={password}
@@ -66,7 +72,9 @@ export default function Register() {
           </Field>
 
           <Field>
-            <Label htmlFor='confirm'>Confirm Password</Label>
+            <Label htmlFor='confirm' $required>
+              Confirm Password
+            </Label>
             <PasswordInput
               id='confirm'
               value={confirm}
