@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useCart } from '../hooks/useCart';
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -11,6 +12,7 @@ export default function Header() {
   const onRegister = pathname === '/register';
 
   const { user, logout } = useAuth();
+  const { count } = useCart();
   const [open, setOpen] = useState(false);
 
   const greeting = user?.name ? `Welcome, ${user.name}` : '';
@@ -59,6 +61,11 @@ export default function Header() {
                         height='30'
                         alt='Cart'
                       />
+                      {count > 0 && (
+                        <CartBadge aria-label={`${count} items in cart`}>
+                          {count}
+                        </CartBadge>
+                      )}
                     </Link>
                   </CartItem>
                 )}
@@ -188,6 +195,7 @@ const Nav = styled.nav`
 `;
 
 const CartItem = styled.li`
+  position: relative;
   display: inline-flex;
   align-items: center;
   a {
@@ -219,6 +227,24 @@ const RightSide = styled.div`
   @media (max-width: 768px) {
     display: none;
   }
+`;
+
+const CartBadge = styled.span`
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff523b;
+  color: #fff;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 `;
 
 const Greeting = styled.div`

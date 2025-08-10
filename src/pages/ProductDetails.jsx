@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useParams, Link } from 'react-router-dom';
 import { FaIndent, FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 import products from '../data/products';
+import { useCart } from '../hooks/useCart';
 
 function Stars({ rating = 0 }) {
   const full = Math.floor(rating);
@@ -24,16 +25,23 @@ function Stars({ rating = 0 }) {
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const { addItem } = useCart();
 
   const product = useMemo(() => {
     const found = products.find((p) => String(p.id) === String(id));
-    // fallback to first product so the page always renders
     return found || products[0];
   }, [id]);
 
   const [mainImg, setMainImg] = useState(
     product?.src || '/images/product-1.jpg'
   );
+
+  // quantity state
+  const [qty, setQty] = useState(1);
+  const onQtyChange = (e) => {
+    const n = Math.max(1, parseInt(e.target.value, 10) || 1);
+    setQty(n);
+  };
 
   // TODO replace with real gallery paths later
   const smallImages = [
@@ -48,6 +56,25 @@ export default function ProductDetails() {
     () => products.filter((p) => p.id !== product.id).slice(0, 4),
     [product.id]
   );
+
+  // Add to cart click handler (no navigation)
+  const handleAddToCart = () => {
+    // ensure numeric price for cart math
+    const price =
+      typeof product.price === 'number'
+        ? product.price
+        : parseFloat(String(product.price || '0').replace(/[^0-9.]/g, '')) || 0;
+
+    addItem(
+      {
+        id: product.id,
+        title: product.title,
+        price,
+        src: product.src,
+      },
+      qty
+    );
+  };
 
   return (
     <>
@@ -90,8 +117,16 @@ export default function ProductDetails() {
                 <option>Small</option>
               </Select>
 
-              <QuantityInput type='number' defaultValue={1} min={1} />
-              <AddButton href='/cart'>Add To Cart</AddButton>
+              <QuantityInput
+                type='number'
+                value={qty}
+                min={1}
+                onChange={onQtyChange}
+                aria-label='Quantity'
+              />
+              <AddButton type='button' onClick={handleAddToCart}>
+                Add To Cart
+              </AddButton>
 
               <DetailsHeading>
                 PRODUCT DETAILS <FaIndent />
@@ -136,7 +171,9 @@ export default function ProductDetails() {
   );
 }
 
-// styled-components
+/* ===========================
+ styled-components (below)
+ =========================== */
 const SmallContainer = styled.div`
   max-width: 1080px;
   margin: auto;
@@ -224,14 +261,15 @@ const QuantityInput = styled.input`
   }
 `;
 
-const AddButton = styled.a`
+const AddButton = styled.button`
   display: inline-block;
   background: #ff523b;
   color: #fff;
   padding: 8px 30px;
   margin: 10px 0;
   border-radius: 30px;
-  text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: background 0.5s;
 
   &:hover {

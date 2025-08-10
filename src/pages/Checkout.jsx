@@ -1,10 +1,14 @@
 // firestore:src/pages/Checkout.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input, Field, Label } from '../components/forms/Input';
+import { useCart } from '../hooks/useCart';
 
 export default function Checkout() {
+  const navigate = useNavigate();
+  const { items, subtotal, tax, shipping, total, clear } = useCart();
+
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -24,16 +28,19 @@ export default function Checkout() {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    alert('Order placed!');
+    if (items.length === 0) return alert('Your cart is empty.');
+    // TODO: real checkout
+    clear();
+    alert('Order placed! Thank you.');
+    navigate('/');
   };
 
-  // static summary (swap with real cart later)
   const summary = [
-    { label: 'Subtotal', amount: '$200.00' },
-    { label: 'Tax', amount: '$35.00' },
-    { label: 'Shipping', amount: '$10.00' },
+    { label: 'Subtotal', amount: `$${subtotal.toFixed(2)}` },
+    { label: 'Tax', amount: `$${tax.toFixed(2)}` },
+    { label: 'Shipping', amount: `$${shipping.toFixed(2)}` },
   ];
-  const totalAmount = '$245.00';
+  const totalAmount = `$${total.toFixed(2)}`;
 
   return (
     <PageWrap>
@@ -49,9 +56,7 @@ export default function Checkout() {
             <SectionTitle>Contact</SectionTitle>
             <Form onSubmit={onSubmit}>
               <Field>
-                <Label htmlFor='fullName' $required>
-                  Full name
-                </Label>
+                <Label htmlFor='fullName'>Full name</Label>
                 <Input
                   id='fullName'
                   name='fullName'
@@ -64,9 +69,7 @@ export default function Checkout() {
               </Field>
 
               <Field>
-                <Label htmlFor='email' $required>
-                  Email
-                </Label>
+                <Label htmlFor='email'>Email</Label>
                 <Input
                   id='email'
                   name='email'
@@ -82,9 +85,7 @@ export default function Checkout() {
               <SectionTitle style={{ marginTop: 6 }}>Shipping</SectionTitle>
 
               <Field>
-                <Label htmlFor='address' $required>
-                  Address
-                </Label>
+                <Label htmlFor='address'>Address</Label>
                 <Input
                   id='address'
                   name='address'
@@ -98,9 +99,7 @@ export default function Checkout() {
 
               <Row>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='city' $required>
-                    City
-                  </Label>
+                  <Label htmlFor='city'>City</Label>
                   <Input
                     id='city'
                     name='city'
@@ -113,9 +112,7 @@ export default function Checkout() {
                 </Field>
 
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='state' $required>
-                    State
-                  </Label>
+                  <Label htmlFor='state'>State</Label>
                   <Input
                     id='state'
                     name='state'
@@ -128,9 +125,7 @@ export default function Checkout() {
                 </Field>
 
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='zip' $required>
-                    ZIP
-                  </Label>
+                  <Label htmlFor='zip'>ZIP</Label>
                   <Input
                     id='zip'
                     name='zip'
@@ -146,9 +141,7 @@ export default function Checkout() {
               <SectionTitle style={{ marginTop: 6 }}>Payment</SectionTitle>
 
               <Field>
-                <Label htmlFor='cardNumber' $required>
-                  Card number
-                </Label>
+                <Label htmlFor='cardNumber'>Card number</Label>
                 <Input
                   id='cardNumber'
                   name='cardNumber'
@@ -163,9 +156,7 @@ export default function Checkout() {
 
               <Row>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='expiry' $required>
-                    Expiry
-                  </Label>
+                  <Label htmlFor='expiry'>Expiry</Label>
                   <Input
                     id='expiry'
                     name='expiry'
@@ -178,9 +169,7 @@ export default function Checkout() {
                   />
                 </Field>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='cvv' $required>
-                    CVV
-                  </Label>
+                  <Label htmlFor='cvv'>CVV</Label>
                   <Input
                     id='cvv'
                     name='cvv'
@@ -194,7 +183,9 @@ export default function Checkout() {
                 </Field>
               </Row>
 
-              <SubmitBtn type='submit'>Place order</SubmitBtn>
+              <SubmitBtn type='submit' disabled={items.length === 0}>
+                {items.length === 0 ? 'Cart is empty' : 'Place order'}
+              </SubmitBtn>
             </Form>
           </Card>
 
@@ -222,12 +213,10 @@ export default function Checkout() {
   );
 }
 
-/* ===========================
-   styled-components (below)
-   =========================== */
-
+//styled-components
 const PageWrap = styled.section`
   background: radial-gradient(#fff, #ffd6d6); /* brand background */
+  min-height: 100vh;
   padding: 40px 0 70px;
 `;
 
