@@ -1,170 +1,243 @@
-// firestore:src/pages/ProductDetails.jsx
-import React, { useState } from 'react';
+// firestore:src/pages/Products.jsx
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
+import productsData from '../data/products';
 
-// Styled components
+function Stars({ rating = 0 }) {
+  const full = Math.floor(rating);
+  const hasHalf = rating - full >= 0.5;
+  const empty = 5 - full - (hasHalf ? 1 : 0);
+  return (
+    <Rating aria-label={`Rated ${rating} out of 5`}>
+      {Array.from({ length: full }).map((_, i) => (
+        <FaStar key={`f${i}`} />
+      ))}
+      {hasHalf && <FaStarHalfAlt key='half' />}
+      {Array.from({ length: empty }).map((_, i) => (
+        <FaRegStar key={`e${i}`} />
+      ))}
+    </Rating>
+  );
+}
+
+function parsePrice(value) {
+  if (typeof value === 'number') return value;
+  if (!value) return 0;
+  return Number(String(value).replace(/[^0-9.]/g, '')) || 0;
+}
+
+export default function Products() {
+  const [sort, setSort] = useState('default');
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
+  const sorted = useMemo(() => {
+    const arr = [...productsData];
+    if (sort === 'price') {
+      arr.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+    } else if (sort === 'rating') {
+      arr.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+    return arr;
+  }, [sort]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const current = sorted.slice((page - 1) * pageSize, page * pageSize);
+
+  const goTo = (n) => {
+    if (n < 1 || n > pageCount) return;
+    setPage(n);
+    // scroll to top of grid on page change
+    document
+      ?.getElementById('products-top')
+      ?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <PageWrap>
+      <SmallContainer id='products-top'>
+        {/* Title + sort row */}
+        <Row2>
+          <H2>All Products</H2>
+          <Select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setPage(1);
+            }}
+            aria-label='Sort products'
+          >
+            <option value='default'>Default Sorting</option>
+            <option value='price'>Sort by price</option>
+            <option value='rating'>Sort by rating</option>
+            {/* Placeholders to mirror original UI; wire up later if desired */}
+            <option value='popularity' disabled>
+              Sort by popularity
+            </option>
+            <option value='sale' disabled>
+              Sort by sale
+            </option>
+          </Select>
+        </Row2>
+
+        {/* Product grid (4 across like original) */}
+        <Grid>
+          {current.map((p) => (
+            <Card key={p.id}>
+              <a href={`/products/${p.id}`}>
+                <img src={p.src} alt={p.title} />
+              </a>
+              <h4>
+                <a href={`/products/${p.id}`}>{p.title}</a>
+              </h4>
+              <Stars rating={p.rating} />
+              <Price>{p.price}</Price>
+            </Card>
+          ))}
+        </Grid>
+
+        {/* Pagination */}
+        <PageBtn>
+          {Array.from({ length: pageCount }).map((_, i) => (
+            <span
+              key={i}
+              role='button'
+              tabIndex={0}
+              aria-current={page === i + 1 ? 'page' : undefined}
+              className={page === i + 1 ? 'active' : ''}
+              onClick={() => goTo(i + 1)}
+              onKeyDown={(e) => (e.key === 'Enter' ? goTo(i + 1) : null)}
+            >
+              {i + 1}
+            </span>
+          ))}
+          {page < pageCount && (
+            <span
+              role='button'
+              tabIndex={0}
+              onClick={() => goTo(page + 1)}
+              onKeyDown={(e) => (e.key === 'Enter' ? goTo(page + 1) : null)}
+            >
+              &#8594;
+            </span>
+          )}
+        </PageBtn>
+      </SmallContainer>
+    </PageWrap>
+  );
+}
+
+// styled-components
+const PageWrap = styled.section`
+  margin: 40px 0 70px;
+`;
+
 const SmallContainer = styled.div`
   max-width: 1080px;
   margin: auto;
   padding: 0 25px;
 `;
 
-const SingleProductWrapper = styled.div`
-  margin-top: 80px;
+const Row2 = styled.div`
+  display: flex;
+  justify-content: space-between; /* title left, select right */
+  align-items: center;
+  margin: 50px 0 30px;
 `;
 
-const Row = styled.div`
+const H2 = styled.h2`
+  color: #555;
+`;
+
+const Select = styled.select`
+  border: 1px solid #ff523b;
+  padding: 5px 10px;
+  outline: none;
+  background: #fff;
+  color: #555;
+`;
+
+const Grid = styled.div`
   display: flex;
-  align-items: center;
+  align-items: stretch;
   flex-wrap: wrap;
   justify-content: space-around;
 `;
 
-const Col2 = styled.div`
-  flex-basis: 50%;
-  min-width: 300px;
-  padding: 20px;
-`;
-
-const MainImage = styled.img`
-  width: 100%;
-`;
-
-const SmallImgRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-`;
-
-const SmallImgCol = styled.div`
-  flex-basis: 24%;
-  cursor: pointer;
-`;
-
-const SmallImage = styled.img`
-  width: 100%;
-`;
-
-const Breadcrumb = styled.p`
-  color: #555;
-`;
-
-const ProductTitle = styled.h1`
-  margin: 20px 0;
-`;
-
-const Price = styled.h4`
-  margin: 20px 0;
-  font-size: 22px;
-  font-weight: bold;
-`;
-
-const Select = styled.select`
-  display: block;
+const Card = styled.div`
+  flex-basis: 25%;
   padding: 10px;
-  margin-top: 20px;
-`;
+  min-width: 200px;
+  margin-bottom: 50px;
+  transition: transform 0.5s;
 
-const QuantityInput = styled.input`
-  width: 50px;
-  height: 40px;
-  padding-left: 10px;
-  font-size: 20px;
-  margin: 10px 0;
-  border: 1px solid #ff523b;
-  &:focus {
-    outline: none;
-  }
-`;
-
-const AddButton = styled.a`
-  display: inline-block;
-  background: #ff523b;
-  color: #fff;
-  padding: 8px 30px;
-  margin: 10px 0;
-  border-radius: 30px;
-  text-decoration: none;
-  transition: background 0.5s;
   &:hover {
-    background: #563434;
+    transform: translateY(-5px);
+  }
+
+  img {
+    width: 100%;
+    display: block;
+  }
+
+  h4 {
+    margin: 10px 0;
+    color: #555;
+    font-weight: normal;
+  }
+
+  a {
+    color: #555;
+    text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    flex-basis: 45%;
+  }
+
+  @media (max-width: 480px) {
+    flex-basis: 100%;
   }
 `;
 
-const DetailsHeading = styled.h3`
-  margin-top: 30px;
+const Rating = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 10px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: #ff523b;
+  }
+`;
+
+const Price = styled.p`
+  font-size: 14px;
   color: #555;
 `;
 
-const DetailsText = styled.p`
-  color: #555;
-  line-height: 1.6;
+const PageBtn = styled.div`
+  text-align: center;
+
+  span {
+    display: inline-block;
+    border: 1px solid #ff523b;
+    margin: 0 5px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+    color: #555;
+    user-select: none;
+  }
+
+  span.active,
+  span:hover {
+    background: #ff523b;
+    color: #fff;
+  }
 `;
-
-export default function ProductDetails() {
-  const [mainImg, setMainImg] = useState('/images/product-1.jpg');
-  const smallImages = [
-    '/images/product-1.jpg',
-    '/images/gallery-2.jpg',
-    '/images/gallery-3.jpg',
-    '/images/gallery-4.jpg',
-  ];
-
-  return (
-    <>
-      <Header />
-
-      <SmallContainer>
-        <SingleProductWrapper>
-          <Row>
-            <Col2>
-              <MainImage src={mainImg} alt='Product' id='ProductImg' />
-              <SmallImgRow>
-                {smallImages.map((src, idx) => (
-                  <SmallImgCol key={idx}>
-                    <SmallImage
-                      src={src}
-                      alt='Thumbnail'
-                      onClick={() => setMainImg(src)}
-                    />
-                  </SmallImgCol>
-                ))}
-              </SmallImgRow>
-            </Col2>
-            <Col2>
-              <Breadcrumb>Home / T-Shirt</Breadcrumb>
-              <ProductTitle>Blue Tshirt by HRX</ProductTitle>
-              <Price>$50.00</Price>
-
-              <Select>
-                <option>Select Size</option>
-                <option>XXL</option>
-                <option>XL</option>
-                <option>Large</option>
-                <option>Medium</option>
-                <option>Small</option>
-              </Select>
-
-              <QuantityInput type='number' defaultValue={1} />
-              <AddButton href='/cart'>Add To Cart</AddButton>
-
-              <DetailsHeading>
-                PRODUCT DETAILS <i className='fa fa-indent'></i>
-              </DetailsHeading>
-              <DetailsText>
-                Give your summer wardrobe a style upgrade with the HRX Men's
-                Active T-shirt. Team it with a pair of shorts for your morning
-                workout or a denim for an evening out with the guys.
-              </DetailsText>
-            </Col2>
-          </Row>
-        </SingleProductWrapper>
-      </SmallContainer>
-
-      {/* Related Products & footer go here */}
-      <Footer />
-    </>
-  );
-}
