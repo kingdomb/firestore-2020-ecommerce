@@ -7,16 +7,18 @@ import { useAuth } from '../hooks/useAuth';
 export default function Header() {
   const { pathname } = useLocation();
   const isHome = pathname === '/';
+  const onLogin = pathname === '/login';
+  const onRegister = pathname === '/register';
+
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const greeting = user?.name ? `Welcome, ${user.name}` : 'Welcome';
+  const greeting = user?.name ? `Welcome, ${user.name}` : '';
 
   return (
     <HeaderWrap $isHome={isHome}>
       <Container>
         <NavBar>
-          {/* Left: Logo */}
           <Logo>
             <Link to='/'>
               <img
@@ -69,7 +71,6 @@ export default function Header() {
               </ul>
             </Nav>
 
-            {/* Mobile menu toggle (only shows on small screens) */}
             <MenuIcon
               src='/images/menu.png'
               alt='Menu'
@@ -78,21 +79,34 @@ export default function Header() {
           </NavWrap>
 
           <RightSide>
-            <Greeting aria-hidden>{greeting}</Greeting>
+            {greeting && <Greeting aria-hidden>{greeting}</Greeting>}
 
-            <AuthArea>
-              {user ? (
-                <LogoutBtn type='button' onClick={logout}>
-                  Logout
-                </LogoutBtn>
-              ) : (
-                <AuthLinks>
-                  <Link to='/login'>Login</Link>
-                  <span>•</span>
-                  <Link to='/register'>Register</Link>
-                </AuthLinks>
-              )}
-            </AuthArea>
+            {user ? (
+              <LogoutBtn type='button' onClick={logout}>
+                Logout
+              </LogoutBtn>
+            ) : (
+              <AuthButtons>
+                {onLogin ? (
+                  <ButtonLink to='/register' $variant='primary'>
+                    Register
+                  </ButtonLink>
+                ) : onRegister ? (
+                  <ButtonLink to='/login' $variant='primary'>
+                    Login
+                  </ButtonLink>
+                ) : (
+                  <>
+                    <ButtonLink to='/login' $variant='ghost'>
+                      Login
+                    </ButtonLink>
+                    <ButtonLink to='/register' $variant='primary'>
+                      Register
+                    </ButtonLink>
+                  </>
+                )}
+              </AuthButtons>
+            )}
           </RightSide>
         </NavBar>
       </Container>
@@ -131,7 +145,7 @@ const Logo = styled.div`
 `;
 
 const NavWrap = styled.div`
-  margin-left: auto; /* shove nav rightward */
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -159,7 +173,6 @@ const Nav = styled.nav`
     color: #ff523b;
   }
 
-  /* Mobile dropdown */
   @media (max-width: 768px) {
     position: absolute;
     top: 100%;
@@ -206,11 +219,11 @@ const MenuIcon = styled.img`
 const RightSide = styled.div`
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-left: 36px; /* was 16px — gives more space between nav and greeting */
+  gap: 20px; /* more breathing room */
+  margin-left: 40px;
 
-  @media (min-width: 1280px) {
-    margin-left: 48px; /* a touch more on very wide screens (optional) */
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -218,42 +231,104 @@ const Greeting = styled.div`
   color: #777;
   font-size: 14px;
   white-space: nowrap;
-
-  @media (max-width: 992px) {
-    display: none;
-  }
 `;
 
-const AuthArea = styled.div`
-  display: flex;
+const AuthButtons = styled.div`
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+`;
 
-  @media (max-width: 768px) {
-    display: none;
+const BTN_HEIGHT = '36px';
+
+const ButtonLink = styled(Link)`
+  --brand: #ff523b;
+  --brand-dark: #563434;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: ${BTN_HEIGHT};
+  padding: 0 16px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+
+  border: 1px solid var(--brand);
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.15s ease;
+  will-change: transform;
+
+  ${({ $variant }) =>
+    $variant === 'primary'
+      ? `
+    background: var(--brand);
+    color: #fff;
+
+    &:hover { background: var(--brand-dark); border-color: var(--brand-dark); transform: translateY(-1px); }
+    &:active { transform: translateY(0); }
+  `
+      : `
+    background: transparent;
+    color: var(--brand);
+
+    &:hover { background: rgba(255,82,59,0.08); transform: translateY(-1px); }
+    &:active { transform: translateY(0); }
+  `}
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 82, 59, 0.3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    &:hover,
+    &:active {
+      transform: none;
+    }
   }
 `;
 
 const LogoutBtn = styled.button`
-  background: #ff523b;
+  --brand: #ff523b;
+  --brand-dark: #563434;
+
+  height: ${BTN_HEIGHT};
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--brand);
+  background: var(--brand);
   color: #fff;
-  padding: 6px 16px;
-  border-radius: 30px;
-  border: none;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  will-change: transform;
 
   &:hover {
-    background: #563434;
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
   }
-`;
+  &:active {
+    transform: translateY(0);
+  }
 
-const AuthLinks = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 82, 59, 0.3);
+  }
 
-  a {
-    color: #555;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    &:hover,
+    &:active {
+      transform: none;
+    }
   }
 `;
