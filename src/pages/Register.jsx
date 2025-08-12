@@ -1,7 +1,13 @@
 // firestore:src/pages/Register.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Input, PasswordInput, Field, Label } from '../components/forms/Input';
+import {
+  Input,
+  PasswordInput,
+  Field,
+  Label,
+  ErrorText,
+} from '../components/forms/Input';
 // import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
@@ -11,12 +17,36 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
 
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirm: '',
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password !== confirm) {
-      alert('Passwords do not match');
-      return;
-    }
+
+    const next = {};
+    if (!name.trim()) next.name = 'Name is required';
+
+    if (!email.trim()) next.email = 'Email is required';
+    else if (!/^\S+@\S+\.\S+$/.test(email)) next.email = 'Enter a valid email';
+
+    if (!password.trim()) next.password = 'Password is required';
+    else if (password.length < 8) next.password = 'Use at least 8 characters';
+
+    if (!confirm.trim()) next.confirm = 'Confirm your password';
+    else if (password !== confirm) next.confirm = 'Passwords do not match';
+
+    setErrors({
+      name: next.name || '',
+      email: next.email || '',
+      password: next.password || '',
+      confirm: next.confirm || '',
+    });
+    if (Object.keys(next).length) return;
+
     // registerUser({ name, email, password });
   };
 
@@ -26,7 +56,7 @@ export default function Register() {
         <Heading>Create your account</Heading>
         <Sub>Join FireStore in seconds</Sub>
 
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} noValidate>
           <Field>
             <Label htmlFor='name' $required>
               Name
@@ -36,10 +66,15 @@ export default function Register() {
               type='text'
               placeholder='ex. Jane Doe'
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name) setErrors((p) => ({ ...p, name: '' }));
+              }}
               autoComplete='name'
               required
+              error={errors.name}
             />
+            {errors.name && <ErrorText>{errors.name}</ErrorText>}
           </Field>
 
           <Field>
@@ -51,10 +86,15 @@ export default function Register() {
               type='email'
               placeholder='ex. you@example.com'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors((p) => ({ ...p, email: '' }));
+              }}
               autoComplete='email'
               required
+              error={errors.email}
             />
+            {errors.email && <ErrorText>{errors.email}</ErrorText>}
           </Field>
 
           <Field>
@@ -64,11 +104,16 @@ export default function Register() {
             <PasswordInput
               id='password'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors((p) => ({ ...p, password: '' }));
+              }}
               placeholder='ex. 8+ characters'
               autoComplete='new-password'
               required
+              error={errors.password}
             />
+            {errors.password && <ErrorText>{errors.password}</ErrorText>}
           </Field>
 
           <Field>
@@ -78,11 +123,16 @@ export default function Register() {
             <PasswordInput
               id='confirm'
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                if (errors.confirm) setErrors((p) => ({ ...p, confirm: '' }));
+              }}
               placeholder='ex. confirm password'
               autoComplete='new-password'
               required
+              error={errors.confirm}
             />
+            {errors.confirm && <ErrorText>{errors.confirm}</ErrorText>}
           </Field>
 
           <Actions>
