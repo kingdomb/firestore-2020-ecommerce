@@ -1,6 +1,7 @@
 // firesstore:/src/components/Footer.jsx
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
@@ -30,20 +31,39 @@ export default function Footer() {
           <Col3>
             <H3>Useful Links</H3>
             <List>
-              <li>Coupons</li>
-              <li>Blog Post</li>
-              <li>Return Policy</li>
-              <li>Join Affiliate</li>
+              <li>
+                <Link to='/contact'>Contact</Link>
+              </li>
+              <li>
+                <a href='#'>Coupons</a>
+              </li>
+              <li>
+                <a href='#'>Blog Post</a>
+              </li>
+              <li>
+                <a href='#'>Return Policy</a>
+              </li>
+              <li>
+                <a href='#'>Join Affiliate</a>
+              </li>
             </List>
           </Col3>
 
           <Col4>
             <H3>Follow Us</H3>
             <List>
-              <li>Facebook</li>
-              <li>Twitter</li>
-              <li>Instagram</li>
-              <li>YouTube</li>
+              <li>
+                <a href='#'>Facebook</a>
+              </li>
+              <li>
+                <a href='#'>Twitter</a>
+              </li>
+              <li>
+                <a href='#'>Instagram</a>
+              </li>
+              <li>
+                <a href='#'>YouTube</a>
+              </li>
             </List>
           </Col4>
         </Row>
@@ -55,10 +75,7 @@ export default function Footer() {
   );
 }
 
-/* ===========================
-   styled-components (below)
-   =========================== */
-
+// styled-components
 const FooterWrap = styled.footer`
   background: #000;
   color: #8a8a8a;
@@ -89,24 +106,17 @@ const baseCol = `
 `;
 
 const Col1 = styled.div`
-  ${baseCol}
-  flex-basis: 30%;
+  ${baseCol} flex-basis: 30%;
 `;
-
 const Col2 = styled.div`
-  ${baseCol}
-  flex: 1;
+  ${baseCol} flex: 1;
   text-align: center;
 `;
-
 const Col3 = styled.div`
-  ${baseCol}
-  flex-basis: 12%;
+  ${baseCol} flex-basis: 12%;
 `;
-
 const Col4 = styled.div`
-  ${baseCol}
-  flex-basis: 12%;
+  ${baseCol} flex-basis: 12%;
 `;
 
 const H3 = styled.h3`
@@ -142,8 +152,14 @@ const List = styled.ul`
   list-style: none;
 
   li {
-    display: block;
     line-height: 1.9;
+  }
+  a {
+    color: #8a8a8a;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
   }
 `;
 

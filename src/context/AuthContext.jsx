@@ -6,22 +6,36 @@ import api from '../services/api';
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+/**
+ * Dev-friendly AuthProvider
+ * - If a JWT token exists, it is primary.
+ * - Otherwise, seeds from `initialUser` for local UI testing.
+ */
+export function AuthProvider({ children, initialUser = null }) {
+  const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       try {
         setUser(jwtDecode(token));
       } catch {
         localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+        setUser(initialUser || null);
+      } finally {
+        setLoading(false);
       }
+    } else {
+      // no token → use the provided initialUser
+      setUser(initialUser || null);
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+    
+  }, [initialUser]);
 
   async function register({ name, email, password }) {
     const { data } = await api.post('/auth/register', {
