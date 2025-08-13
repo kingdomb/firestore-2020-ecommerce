@@ -1,120 +1,17 @@
 // firestore:src/pages/Checkout.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-
-// Styled components
-const CheckoutWrapper = styled.div`
-  max-width: 1080px;
-  margin: 80px auto;
-  padding: 0 25px;
-`;
-
-const Title = styled.h2`
-  margin-bottom: 40px;
-  color: #333;
-`;
-
-const FlexRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
-`;
-
-const FormSection = styled.div`
-  flex: 1 1 60%;
-  background: #fff;
-  padding: 30px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-`;
-
-const SummarySection = styled.div`
-  flex: 1 1 35%;
-  background: #fff;
-  padding: 30px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-  height: fit-content;
-`;
-
-const Field = styled.div`
-  margin-bottom: 20px;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  &:focus {
-    outline: none;
-    border-color: #ff523b;
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  &:focus {
-    outline: none;
-    border-color: #ff523b;
-  }
-`;
-
-const OrderList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const OrderItem = styled.li`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  color: #555;
-`;
-
-const Total = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  font-size: 18px;
-  margin-top: 20px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-`;
-
-const Button = styled.button`
-  width: 100%;
-  padding: 15px;
-  margin-top: 30px;
-  background: #ff523b;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s;
-  &:hover {
-    background: #e04e2f;
-  }
-`;
+import { Link, useNavigate } from 'react-router-dom';
+import { Input, Field, Label } from '../components/forms/Input';
+import { useCart } from '../hooks/useCart';
 
 export default function Checkout() {
-  // placeholder state
-  const [formData, setFormData] = useState({
-    name: '',
+  const navigate = useNavigate();
+  const { items, subtotal, tax, shipping, total, clear } = useCart();
+
+  const [form, setForm] = useState({
+    fullName: '',
+    email: '',
     address: '',
     city: '',
     state: '',
@@ -124,147 +21,341 @@ export default function Checkout() {
     cvv: '',
   });
 
-  const handleChange = (e) => {
+  const onChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    // TODO: process payment and redirect
-    alert('Order placed!');
+    if (items.length === 0) return alert('Your cart is empty.');
+    // TODO: real checkout
+    clear();
+    alert('Order placed! Thank you.');
+    navigate('/');
   };
 
-  // static summary (replace with dynamic data)
-  const summaryItems = [
-    { label: 'Subtotal', amount: '$200.00' },
-    { label: 'Tax', amount: '$35.00' },
-    { label: 'Shipping', amount: '$10.00' },
+  const summary = [
+    { label: 'Subtotal', amount: `$${subtotal.toFixed(2)}` },
+    { label: 'Tax', amount: `$${tax.toFixed(2)}` },
+    { label: 'Shipping', amount: `$${shipping.toFixed(2)}` },
   ];
-
-  const totalAmount = '$245.00';
+  const totalAmount = `$${total.toFixed(2)}`;
 
   return (
-    <>
-      <Header />
-      <CheckoutWrapper>
-        <Title>Checkout</Title>
-        <FlexRow>
-          <FormSection>
-            <form onSubmit={handleSubmit}>
+    <PageWrap>
+      <SmallContainer>
+        <HeaderRow>
+          <Title>Checkout</Title>
+          <BackToCart to='/cart'>Modify cart →</BackToCart>
+        </HeaderRow>
+
+        <Grid>
+          {/* Left: Form */}
+          <Card>
+            <SectionTitle>Contact</SectionTitle>
+            <Form onSubmit={onSubmit}>
               <Field>
-                <Label htmlFor='name'>Full Name</Label>
+                <Label htmlFor='fullName'>Full name</Label>
                 <Input
-                  id='name'
-                  name='name'
-                  placeholder='John Doe'
-                  value={formData.name}
-                  onChange={handleChange}
+                  id='fullName'
+                  name='fullName'
+                  type='text'
+                  placeholder='ex. John Doe'
+                  value={form.fullName}
+                  onChange={onChange}
                   required
                 />
               </Field>
+
+              <Field>
+                <Label htmlFor='email'>Email</Label>
+                <Input
+                  id='email'
+                  name='email'
+                  type='email'
+                  placeholder='ex. you@example.com'
+                  value={form.email}
+                  onChange={onChange}
+                  autoComplete='email'
+                  required
+                />
+              </Field>
+
+              <SectionTitle style={{ marginTop: 6 }}>Shipping</SectionTitle>
+
               <Field>
                 <Label htmlFor='address'>Address</Label>
                 <Input
                   id='address'
                   name='address'
-                  placeholder='123 Main St'
-                  value={formData.address}
-                  onChange={handleChange}
+                  placeholder='ex. 123 Main St'
+                  value={form.address}
+                  onChange={onChange}
+                  autoComplete='address-line1'
                   required
                 />
               </Field>
+
+              <Row>
+                <Field style={{ flex: 1 }}>
+                  <Label htmlFor='city'>City</Label>
+                  <Input
+                    id='city'
+                    name='city'
+                    placeholder='ex. Chicago'
+                    value={form.city}
+                    onChange={onChange}
+                    autoComplete='address-level2'
+                    required
+                  />
+                </Field>
+
+                <Field style={{ flex: 1 }}>
+                  <Label htmlFor='state'>State</Label>
+                  <Input
+                    id='state'
+                    name='state'
+                    placeholder='ex. IL'
+                    value={form.state}
+                    onChange={onChange}
+                    autoComplete='address-level1'
+                    required
+                  />
+                </Field>
+
+                <Field style={{ flex: 1 }}>
+                  <Label htmlFor='zip'>ZIP</Label>
+                  <Input
+                    id='zip'
+                    name='zip'
+                    placeholder='ex. 60601'
+                    value={form.zip}
+                    onChange={onChange}
+                    autoComplete='postal-code'
+                    required
+                  />
+                </Field>
+              </Row>
+
+              <SectionTitle style={{ marginTop: 6 }}>Payment</SectionTitle>
+
               <Field>
-                <Label htmlFor='city'>City</Label>
-                <Input
-                  id='city'
-                  name='city'
-                  placeholder='City'
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
-              <Field>
-                <Label htmlFor='state'>State</Label>
-                <Input
-                  id='state'
-                  name='state'
-                  placeholder='State'
-                  value={formData.state}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
-              <Field>
-                <Label htmlFor='zip'>ZIP Code</Label>
-                <Input
-                  id='zip'
-                  name='zip'
-                  placeholder='ZIP Code'
-                  value={formData.zip}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
-              <Field>
-                <Label htmlFor='cardNumber'>Card Number</Label>
+                <Label htmlFor='cardNumber'>Card number</Label>
                 <Input
                   id='cardNumber'
                   name='cardNumber'
-                  placeholder='0000 0000 0000 0000'
-                  value={formData.cardNumber}
-                  onChange={handleChange}
+                  placeholder='ex. 4242 4242 4242 4242'
+                  value={form.cardNumber}
+                  onChange={onChange}
+                  autoComplete='cc-number'
+                  inputMode='numeric'
                   required
                 />
               </Field>
-              <Field>
-                <Label htmlFor='expiry'>Expiry Date</Label>
-                <Input
-                  id='expiry'
-                  name='expiry'
-                  placeholder='MM/YY'
-                  value={formData.expiry}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
-              <Field>
-                <Label htmlFor='cvv'>CVV</Label>
-                <Input
-                  id='cvv'
-                  name='cvv'
-                  placeholder='123'
-                  value={formData.cvv}
-                  onChange={handleChange}
-                  required
-                />
-              </Field>
-              <Button type='submit'>Place Order</Button>
-            </form>
-          </FormSection>
 
-          <SummarySection>
-            <h3>Order Summary</h3>
-            <OrderList>
-              {summaryItems.map((item) => (
-                <OrderItem key={item.label}>
-                  <span>{item.label}</span>
-                  <span>{item.amount}</span>
-                </OrderItem>
+              <Row>
+                <Field style={{ flex: 1 }}>
+                  <Label htmlFor='expiry'>Expiry</Label>
+                  <Input
+                    id='expiry'
+                    name='expiry'
+                    placeholder='ex. 08/27'
+                    value={form.expiry}
+                    onChange={onChange}
+                    autoComplete='cc-exp'
+                    inputMode='numeric'
+                    required
+                  />
+                </Field>
+                <Field style={{ flex: 1 }}>
+                  <Label htmlFor='cvv'>CVV</Label>
+                  <Input
+                    id='cvv'
+                    name='cvv'
+                    placeholder='ex. 123'
+                    value={form.cvv}
+                    onChange={onChange}
+                    autoComplete='cc-csc'
+                    inputMode='numeric'
+                    required
+                  />
+                </Field>
+              </Row>
+
+              <SubmitBtn type='submit' disabled={items.length === 0}>
+                {items.length === 0 ? 'Cart is empty' : 'Place order'}
+              </SubmitBtn>
+            </Form>
+          </Card>
+
+          {/* Right: Summary */}
+          <SummaryCard>
+            <SectionTitle>Order Summary</SectionTitle>
+            <SummaryList>
+              {summary.map((s) => (
+                <li key={s.label}>
+                  <span>{s.label}</span>
+                  <strong>{s.amount}</strong>
+                </li>
               ))}
-            </OrderList>
-            <Total>
+            </SummaryList>
+            <Divider />
+            <TotalRow>
               <span>Total</span>
-              <span>{totalAmount}</span>
-            </Total>
-            <Button as={Link} to='/cart'>
-              Modify Cart
-            </Button>
-          </SummarySection>
-        </FlexRow>
-      </CheckoutWrapper>
-      <Footer />
-    </>
+              <TotalAmt>{totalAmount}</TotalAmt>
+            </TotalRow>
+            <SecondaryLink to='/products'>Continue shopping</SecondaryLink>
+          </SummaryCard>
+        </Grid>
+      </SmallContainer>
+    </PageWrap>
   );
 }
+
+//styled-components
+const PageWrap = styled.section`
+  background: radial-gradient(#fff, #ffd6d6); /* brand background */
+  min-height: 100vh;
+  padding: 40px 0 70px;
+`;
+
+const SmallContainer = styled.div`
+  max-width: 1080px;
+  margin: auto;
+  padding: 0 25px;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+
+const Title = styled.h2`
+  color: #555;
+`;
+
+const BackToCart = styled(Link)`
+  color: #ff523b;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const cardBase = `
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+`;
+
+const Card = styled.div`
+  ${cardBase}
+  padding: 20px;
+`;
+
+const SummaryCard = styled.div`
+  ${cardBase}
+  padding: 20px;
+  height: fit-content;
+`;
+
+const SectionTitle = styled.h3`
+  color: #333;
+  margin-bottom: 10px;
+`;
+
+const Form = styled.form`
+  display: grid;
+  gap: 14px;
+`;
+
+const Row = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const SubmitBtn = styled.button`
+  --brand: #ff523b;
+  --brand-dark: #563434;
+
+  margin-top: 8px;
+  background: var(--brand);
+  color: #fff;
+  border: 1px solid var(--brand);
+  border-radius: 9999px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+
+  &:hover {
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 82, 59, 0.3);
+  }
+`;
+
+const SummaryList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    color: #555;
+    padding: 8px 2px;
+  }
+`;
+
+const Divider = styled.hr`
+  border: none;
+  height: 1px;
+  background: #eee;
+  margin: 10px 0 12px;
+`;
+
+const TotalRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+`;
+
+const TotalAmt = styled.strong`
+  font-size: 18px;
+  color: #111;
+`;
+
+const SecondaryLink = styled(Link)`
+  display: inline-block;
+  margin-top: 12px;
+  color: #ff523b;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;

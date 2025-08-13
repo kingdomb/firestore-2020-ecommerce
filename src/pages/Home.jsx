@@ -1,7 +1,6 @@
 // firestore:src/pages/Home.jsx
 import React from 'react';
 import styled from 'styled-components';
-import Footer from '../components/Footer';
 import ProductsSection from '../components/ProductsSection';
 import products from '../data/products';
 
@@ -44,7 +43,6 @@ export default function Home() {
       <Offer />
       <Testimonials />
       <Brands />
-      <Footer />
     </>
   );
 }

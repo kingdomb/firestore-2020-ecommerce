@@ -50,6 +50,14 @@ export const Field = styled.div`
 export const Label = styled.label`
   font-size: 14px;
   color: #444;
+  /* Optional red superscript asterisk when $required is true */
+  &::after {
+    content: ${(props) => (props.$required ? '" *"' : '""')};
+    color: #ff523b;
+    font-size: 1.25em;
+    margin-left: 2px;
+    line-height: 1;
+  }
 `;
 
 // styled-components
@@ -64,8 +72,8 @@ const StyledInput = styled.input`
   background: #fff;
 
   &::placeholder {
-    color: #b5b5b5;
-  } /* lighter */
+    color: #b5b5b5; /* lighter placeholder */
+  }
 
   &:focus {
     outline: none;

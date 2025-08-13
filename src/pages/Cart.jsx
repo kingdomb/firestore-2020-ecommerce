@@ -1,54 +1,11 @@
 // firestore:src/pages/Cart.jsx
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-
-/**
- * Simple local-state cart UX so the page feels real.
- * Hook this up to a CartContext later.
- */
-
-const TAX_RATE = 0.175; // example: $200 * 17.5% = $35
+import { useCart } from '../hooks/useCart';
 
 export default function Cart() {
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      title: 'Red Printed T-Shirt',
-      price: 50,
-      src: '/images/buy-1.jpg',
-      qty: 1,
-    },
-    {
-      id: 2,
-      title: 'HRX Sports Shoes',
-      price: 75,
-      src: '/images/buy-2.jpg',
-      qty: 1,
-    },
-    {
-      id: 3,
-      title: 'HRX Gray Trackpants',
-      price: 75,
-      src: '/images/buy-3.jpg',
-      qty: 1,
-    },
-  ]);
-
-  const changeQty = (id, nextQty) => {
-    const qty = Math.max(1, Number(nextQty) || 1);
-    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, qty } : it)));
-  };
-
-  const removeItem = (id) =>
-    setItems((prev) => prev.filter((it) => it.id !== id));
-
-  const { subtotal, tax, total } = useMemo(() => {
-    const sub = items.reduce((s, it) => s + it.price * it.qty, 0);
-    const t = +(sub * TAX_RATE).toFixed(2);
-    const tt = +(sub + t).toFixed(2);
-    return { subtotal: +sub.toFixed(2), tax: t, total: tt };
-  }, [items]);
+  const { items, updateQty, removeItem, subtotal, tax, total } = useCart();
 
   const isEmpty = items.length === 0;
 
@@ -74,7 +31,7 @@ export default function Cart() {
                   <tr>
                     <TableHeader>Product</TableHeader>
                     <TableHeader>Quantity</TableHeader>
-                    <TableHeader $align='right'>Subtotal</TableHeader>
+                    <TableHeader align='right'>Subtotal</TableHeader>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,7 +59,7 @@ export default function Cart() {
                           type='number'
                           min={1}
                           value={it.qty}
-                          onChange={(e) => changeQty(it.id, e.target.value)}
+                          onChange={(e) => updateQty(it.id, e.target.value)}
                           aria-label={`Quantity for ${it.title}`}
                         />
                       </TableCell>
@@ -146,7 +103,8 @@ export default function Cart() {
 
 //styled-components
 const PageWrap = styled.section`
-  margin: 40px 0 70px;
+  min-height: 100vh;
+  padding: 40px 0 70px;
 `;
 
 const SmallContainer = styled.div`
