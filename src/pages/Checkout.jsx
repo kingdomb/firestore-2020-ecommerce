@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { Input, Field, Label } from '../components/forms/Input';
+import { Input, Field, Label, ErrorText } from '../components/forms/Input';
 import { useCart } from '../hooks/useCart';
 
 export default function Checkout() {
@@ -21,14 +21,50 @@ export default function Checkout() {
     cvv: '',
   });
 
+  const [errors, setErrors] = useState({});
+
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (items.length === 0) return alert('Your cart is empty.');
+    if (items.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
+    const next = {};
+
+    // contact
+    if (!form.fullName.trim()) next.fullName = 'Full name is required';
+    if (!form.email.trim()) next.email = 'Email is required';
+    else if (!/^\S+@\S+\.\S+$/.test(form.email))
+      next.email = 'Enter a valid email';
+
+    // shipping
+    if (!form.address.trim()) next.address = 'Address is required';
+    if (!form.city.trim()) next.city = 'City is required';
+    if (!form.state.trim()) next.state = 'State is required';
+    if (!form.zip.trim()) next.zip = 'ZIP is required';
+
+    // payment (light client-side checks)
+    if (!form.cardNumber.trim()) next.cardNumber = 'Card number is required';
+    else if (!/^\d[\d\s]{11,}$/.test(form.cardNumber))
+      next.cardNumber = 'Enter a valid card number';
+
+    if (!form.expiry.trim()) next.expiry = 'Expiry is required';
+    else if (!/^\d{2}\/\d{2}$/.test(form.expiry))
+      next.expiry = 'Use MM/YY format';
+
+    if (!form.cvv.trim()) next.cvv = 'CVV is required';
+    else if (!/^\d{3,4}$/.test(form.cvv)) next.cvv = 'Enter a valid CVV';
+
+    setErrors(next);
+    if (Object.keys(next).length) return;
+
     // TODO: real checkout
     clear();
     alert('Order placed! Thank you.');
@@ -54,9 +90,11 @@ export default function Checkout() {
           {/* Left: Form */}
           <Card>
             <SectionTitle>Contact</SectionTitle>
-            <Form onSubmit={onSubmit}>
+            <Form onSubmit={onSubmit} noValidate>
               <Field>
-                <Label htmlFor='fullName'>Full name</Label>
+                <Label htmlFor='fullName' $required>
+                  Full name
+                </Label>
                 <Input
                   id='fullName'
                   name='fullName'
@@ -65,11 +103,15 @@ export default function Checkout() {
                   value={form.fullName}
                   onChange={onChange}
                   required
+                  error={errors.fullName}
                 />
+                {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
               </Field>
 
               <Field>
-                <Label htmlFor='email'>Email</Label>
+                <Label htmlFor='email' $required>
+                  Email
+                </Label>
                 <Input
                   id='email'
                   name='email'
@@ -79,13 +121,17 @@ export default function Checkout() {
                   onChange={onChange}
                   autoComplete='email'
                   required
+                  error={errors.email}
                 />
+                {errors.email && <ErrorText>{errors.email}</ErrorText>}
               </Field>
 
               <SectionTitle style={{ marginTop: 6 }}>Shipping</SectionTitle>
 
               <Field>
-                <Label htmlFor='address'>Address</Label>
+                <Label htmlFor='address' $required>
+                  Address
+                </Label>
                 <Input
                   id='address'
                   name='address'
@@ -94,12 +140,16 @@ export default function Checkout() {
                   onChange={onChange}
                   autoComplete='address-line1'
                   required
+                  error={errors.address}
                 />
+                {errors.address && <ErrorText>{errors.address}</ErrorText>}
               </Field>
 
               <Row>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='city'>City</Label>
+                  <Label htmlFor='city' $required>
+                    City
+                  </Label>
                   <Input
                     id='city'
                     name='city'
@@ -108,11 +158,15 @@ export default function Checkout() {
                     onChange={onChange}
                     autoComplete='address-level2'
                     required
+                    error={errors.city}
                   />
+                  {errors.city && <ErrorText>{errors.city}</ErrorText>}
                 </Field>
 
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='state'>State</Label>
+                  <Label htmlFor='state' $required>
+                    State
+                  </Label>
                   <Input
                     id='state'
                     name='state'
@@ -121,11 +175,15 @@ export default function Checkout() {
                     onChange={onChange}
                     autoComplete='address-level1'
                     required
+                    error={errors.state}
                   />
+                  {errors.state && <ErrorText>{errors.state}</ErrorText>}
                 </Field>
 
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='zip'>ZIP</Label>
+                  <Label htmlFor='zip' $required>
+                    ZIP
+                  </Label>
                   <Input
                     id='zip'
                     name='zip'
@@ -134,14 +192,18 @@ export default function Checkout() {
                     onChange={onChange}
                     autoComplete='postal-code'
                     required
+                    error={errors.zip}
                   />
+                  {errors.zip && <ErrorText>{errors.zip}</ErrorText>}
                 </Field>
               </Row>
 
               <SectionTitle style={{ marginTop: 6 }}>Payment</SectionTitle>
 
               <Field>
-                <Label htmlFor='cardNumber'>Card number</Label>
+                <Label htmlFor='cardNumber' $required>
+                  Card number
+                </Label>
                 <Input
                   id='cardNumber'
                   name='cardNumber'
@@ -151,12 +213,18 @@ export default function Checkout() {
                   autoComplete='cc-number'
                   inputMode='numeric'
                   required
+                  error={errors.cardNumber}
                 />
+                {errors.cardNumber && (
+                  <ErrorText>{errors.cardNumber}</ErrorText>
+                )}
               </Field>
 
               <Row>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='expiry'>Expiry</Label>
+                  <Label htmlFor='expiry' $required>
+                    Expiry
+                  </Label>
                   <Input
                     id='expiry'
                     name='expiry'
@@ -166,10 +234,14 @@ export default function Checkout() {
                     autoComplete='cc-exp'
                     inputMode='numeric'
                     required
+                    error={errors.expiry}
                   />
+                  {errors.expiry && <ErrorText>{errors.expiry}</ErrorText>}
                 </Field>
                 <Field style={{ flex: 1 }}>
-                  <Label htmlFor='cvv'>CVV</Label>
+                  <Label htmlFor='cvv' $required>
+                    CVV
+                  </Label>
                   <Input
                     id='cvv'
                     name='cvv'
@@ -179,7 +251,9 @@ export default function Checkout() {
                     autoComplete='cc-csc'
                     inputMode='numeric'
                     required
+                    error={errors.cvv}
                   />
+                  {errors.cvv && <ErrorText>{errors.cvv}</ErrorText>}
                 </Field>
               </Row>
 
@@ -315,6 +389,11 @@ const SubmitBtn = styled.button`
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(255, 82, 59, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 `;
 

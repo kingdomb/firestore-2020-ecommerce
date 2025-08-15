@@ -1,7 +1,13 @@
 // firestore:src/pages/Login.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Input, PasswordInput, Field, Label } from '../components/forms/Input';
+import {
+  Input,
+  PasswordInput,
+  Field,
+  Label,
+  ErrorText,
+} from '../components/forms/Input';
 // import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
@@ -9,8 +15,31 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // simple inline errors
+  const [errors, setErrors] = useState({ email: '', password: '' });
+
+  const onChangeEmail = (e) => {
+    setEmail(e.target.value);
+    if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+  };
+
+  const onChangePassword = (e) => {
+    setPassword(e.target.value);
+    if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const next = {};
+    if (!email.trim()) next.email = 'Email is required';
+    else if (!/^\S+@\S+\.\S+$/.test(email)) next.email = 'Enter a valid email';
+
+    if (!password.trim()) next.password = 'Password is required';
+
+    setErrors({ email: next.email || '', password: next.password || '' });
+    if (Object.keys(next).length) return;
+
     // login({ email, password });
   };
 
@@ -19,7 +48,7 @@ export default function Login() {
       <Card>
         <Heading>Welcome back</Heading>
         <Sub>Log in to continue</Sub>
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} noValidate>
           <Field>
             <Label htmlFor='email' $required>
               Email
@@ -29,10 +58,12 @@ export default function Login() {
               type='email'
               placeholder='ex. you@example.com'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={onChangeEmail}
               autoComplete='email'
               required
+              error={errors.email}
             />
+            {errors.email && <ErrorText>{errors.email}</ErrorText>}
           </Field>
 
           <Field>
@@ -42,11 +73,13 @@ export default function Login() {
             <PasswordInput
               id='password'
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={onChangePassword}
               placeholder='ex. your password'
               autoComplete='current-password'
               required
+              error={errors.password}
             />
+            {errors.password && <ErrorText>{errors.password}</ErrorText>}
           </Field>
 
           <Actions>
@@ -62,10 +95,7 @@ export default function Login() {
   );
 }
 
-/* ===========================
-   styled-components (below)
-   =========================== */
-
+// styled-components
 const PageWrap = styled.section`
   background: radial-gradient(#fff, #ffd6d6);
   min-height: 100vh;

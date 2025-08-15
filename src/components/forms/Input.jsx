@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-export function Input(props) {
-  return <StyledInput {...props} />;
+export function Input({ error, ...props }) {
+  return <StyledInput $error={!!error} aria-invalid={!!error} {...props} />;
 }
 
 export function PasswordInput({
@@ -14,6 +14,7 @@ export function PasswordInput({
   placeholder = 'ex. your password',
   required,
   autoComplete = 'current-password',
+  error,
   ...rest
 }) {
   const [show, setShow] = useState(false);
@@ -28,6 +29,8 @@ export function PasswordInput({
         placeholder={placeholder}
         required={required}
         autoComplete={autoComplete}
+        $error={!!error}
+        aria-invalid={!!error}
         {...rest}
       />
       <PwToggle
@@ -60,10 +63,17 @@ export const Label = styled.label`
   }
 `;
 
+/* New inline error text component */
+export const ErrorText = styled.span`
+  color: #e02424;
+  font-size: 12px;
+  line-height: 1.3;
+`;
+
 // styled-components
 const StyledInput = styled.input`
   width: 100%;
-  border: 1px solid #e9e9e9;
+  border: 1px solid ${({ $error }) => ($error ? '#e02424' : '#e9e9e9')};
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 16px;
@@ -77,8 +87,10 @@ const StyledInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #ff523b;
-    box-shadow: 0 0 0 4px rgba(255, 82, 59, 0.15);
+    border-color: ${({ $error }) => ($error ? '#e02424' : '#ff523b')};
+    box-shadow: 0 0 0 4px
+      ${({ $error }) =>
+        $error ? 'rgba(224, 36, 36, 0.15)' : 'rgba(255, 82, 59, 0.15)'};
   }
 `;
 
