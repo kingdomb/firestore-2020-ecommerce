@@ -10,6 +10,7 @@ import Account from './pages/Account';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Contact from './pages/Contact';
 import ProtectedRoute from './components/ProtectedRoute';
 import Footer from './components/Footer';
 import { CartProvider } from './context/CartContext';
@@ -25,6 +26,8 @@ export default function App() {
         <Route path='/products/:id' element={<ProductDetails />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/contact' element={<Contact />} />
+        {/* <Route path='*' element={<NotFound />} /> */}
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>

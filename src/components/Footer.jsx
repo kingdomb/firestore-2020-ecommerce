@@ -35,16 +35,31 @@ export default function Footer() {
                 <Link to='/contact'>Contact</Link>
               </li>
               <li>
-                <a href='#'>Coupons</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Blog Posts
+                </InactiveLink>
               </li>
               <li>
-                <a href='#'>Blog Post</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Return Policy
+                </InactiveLink>
               </li>
               <li>
-                <a href='#'>Return Policy</a>
-              </li>
-              <li>
-                <a href='#'>Join Affiliate</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Join Affiliate
+                </InactiveLink>
               </li>
             </List>
           </Col3>
@@ -53,23 +68,47 @@ export default function Footer() {
             <H3>Follow Us</H3>
             <List>
               <li>
-                <a href='#'>Facebook</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Facebook
+                </InactiveLink>
               </li>
               <li>
-                <a href='#'>Twitter</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Twitter
+                </InactiveLink>
               </li>
               <li>
-                <a href='#'>Instagram</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  Instagram
+                </InactiveLink>
               </li>
               <li>
-                <a href='#'>YouTube</a>
+                <InactiveLink
+                  aria-disabled='true'
+                  role='link'
+                  title='Display-only'
+                >
+                  YouTube
+                </InactiveLink>
               </li>
             </List>
           </Col4>
         </Row>
 
         <HR />
-        <Copy className='copyright'>Copyright 2020 - Bernard Major</Copy>
+        <Copy className='copyright'>Copyright 2025 - Bernard Major</Copy>
       </Container>
     </FooterWrap>
   );
@@ -154,13 +193,26 @@ const List = styled.ul`
   li {
     line-height: 1.9;
   }
-  a {
+
+  /* Keep existing link look for both real links and inactive spans */
+  a,
+  span {
     color: #8a8a8a;
     text-decoration: none;
   }
-  a:hover {
+
+  a:hover,
+  span:hover {
     text-decoration: underline;
   }
+`;
+
+const InactiveLink = styled.span`
+  opacity: 0.8;
+  cursor: not-allowed;
+  pointer-events: none; /* non-focusable / non-clickable */
+  user-select: none;
+  display: inline-block;
 `;
 
 const HR = styled.hr`
