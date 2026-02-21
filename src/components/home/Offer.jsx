@@ -8,7 +8,7 @@ export default function Offer({
   copy = `The Mi Smart Band 4 features a 39.9% larger (than Mi Band 3) AMOLED color full-touch display with adjustable brightness, so everything is clear as can be.`,
   ctaText = 'Buy Now →',
   ctaHref = '/cart',
-  imageSrc = '/images/exclusive.png',
+  imageSrc = 'images/exclusive.png',
   imageAlt = 'Smart Band 4',
 }) {
   return (

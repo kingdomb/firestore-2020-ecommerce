@@ -24,7 +24,7 @@ export default function Header() {
           <Logo>
             <Link to='/'>
               <img
-                src='/images/logo.png'
+                src='images/logo.png'
                 alt='Logo'
                 width='125'
                 height='auto'
@@ -55,7 +55,7 @@ export default function Header() {
                 <CartItem>
                   <Link to='/cart' aria-label='Cart'>
                     <img
-                      src='/images/cart.png'
+                      src='images/cart.png'
                       width='30'
                       height='30'
                       alt='Cart'
@@ -71,7 +71,7 @@ export default function Header() {
             </Nav>
 
             <MenuIcon
-              src='/images/menu.png'
+              src='images/menu.png'
               alt='Menu'
               onClick={() => setOpen((v) => !v)}
             />

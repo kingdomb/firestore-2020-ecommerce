@@ -18,13 +18,13 @@ export default function Home() {
         <SmallContainer>
           <CategoryRow>
             <Col3>
-              <img src='/images/category-1.jpg' alt='' />
+              <img src='images/category-1.jpg' alt='' />
             </Col3>
             <Col3>
-              <img src='/images/category-2.jpg' alt='' />
+              <img src='images/category-2.jpg' alt='' />
             </Col3>
             <Col3>
-              <img src='/images/category-3.jpg' alt='' />
+              <img src='images/category-3.jpg' alt='' />
             </Col3>
           </CategoryRow>
         </SmallContainer>

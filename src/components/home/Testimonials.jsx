@@ -17,19 +17,19 @@ const data = [
   {
     copy: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.",
     name: 'Sean Parker',
-    avatar: '/images/user-1.png',
+    avatar: 'images/user-1.png',
     rating: 4,
   },
   {
     copy: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.",
     name: 'Mike Smith',
-    avatar: '/images/user-2.png',
+    avatar: 'images/user-2.png',
     rating: 4,
   },
   {
     copy: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.",
     name: 'Mabel Joe',
-    avatar: '/images/user-3.png',
+    avatar: 'images/user-3.png',
     rating: 4,
   },
 ];

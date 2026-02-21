@@ -12,16 +12,16 @@ export default function Footer() {
             <H3>Download Our App</H3>
             <P>Download App for Android and ios mobile phone.</P>
             <AppLogos>
-              <img src='/images/play-store.png' alt='Get it on Google Play' />
+              <img src='images/play-store.png' alt='Get it on Google Play' />
               <img
-                src='/images/app-store.png'
+                src='images/app-store.png'
                 alt='Download on the App Store'
               />
             </AppLogos>
           </Col1>
 
           <Col2>
-            <Logo src='/images/logo-short.png' alt='Brand short logo' />
+            <Logo src='images/logo-short.png' alt='Brand short logo' />
             <P>
               Our Purpose Is To Sustainably Make the Pleasure and Benefits of
               Sports Accessible to the Many.
