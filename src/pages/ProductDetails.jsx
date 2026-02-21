@@ -35,7 +35,7 @@ export default function ProductDetails() {
   }, [id]);
 
   const [mainImg, setMainImg] = useState(
-    product?.src || '/images/product-1.jpg'
+    product?.src || 'images/product-1.jpg'
   );
 
   // quantity state
@@ -54,10 +54,10 @@ export default function ProductDetails() {
 
   // TODO replace with real gallery paths later
   const smallImages = [
-    product?.src || '/images/product-1.jpg',
-    '/images/gallery-2.jpg',
-    '/images/gallery-3.jpg',
-    '/images/gallery-4.jpg',
+    product?.src || 'images/product-1.jpg',
+    'images/gallery-2.jpg',
+    'images/gallery-3.jpg',
+    'images/gallery-4.jpg',
   ];
 
   const isPlaceholder = (src) => {

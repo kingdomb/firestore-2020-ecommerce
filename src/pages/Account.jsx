@@ -32,7 +32,7 @@ export default function Account() {
         <Grid>
           {/* Profile card */}
           <ProfileCard>
-            <Avatar src='/images/user-1.png' alt='Avatar' />
+            <Avatar src='images/user-1.png' alt='Avatar' />
             <Name>{user?.name || 'Your Name'}</Name>
             <Email>{user?.email || 'you@example.com'}</Email>
             <Divider />

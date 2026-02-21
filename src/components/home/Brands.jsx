@@ -59,9 +59,9 @@ const Col5 = styled.div`
 `;
 
 const logos = [
-  '/images/logo-godrej.png',
-  '/images/logo-oppo.png',
-  '/images/logo-coca-cola.png',
-  '/images/logo-paypal.png',
-  '/images/logo-philips.png',
+  'images/logo-godrej.png',
+  'images/logo-oppo.png',
+  'images/logo-coca-cola.png',
+  'images/logo-paypal.png',
+  'images/logo-philips.png',
 ];

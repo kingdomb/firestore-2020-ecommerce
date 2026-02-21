@@ -21,7 +21,7 @@ export default function Hero() {
             <Button to='/products'>Explore Now →</Button>
           </Col2>
           <Col2>
-            <img src='/images/image1.png' alt='Hero' />
+            <img src='images/image1.png' alt='Hero' />
           </Col2>
         </HeroRow>
       </Container>
