@@ -1,8 +1,8 @@
-// firestore:src/App.jsx
 import { Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 import { CartProvider } from './context/CartContext';
 import Account from './pages/Account';
 import Cart from './pages/Cart';
@@ -18,6 +18,7 @@ import Register from './pages/Register';
 export default function App() {
   return (
     <CartProvider>
+      <ScrollToTop />
       <Header />
       <Routes>
         {/* Public routes */}
