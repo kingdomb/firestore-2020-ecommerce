@@ -1,7 +1,7 @@
 // firestore:src/components/Header.jsx
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 
@@ -52,23 +52,21 @@ export default function Header() {
                     </NavLink>
                   </li>
                 )}
-                {user && (
-                  <CartItem>
-                    <Link to='/cart' aria-label='Cart'>
-                      <img
-                        src='/images/cart.png'
-                        width='30'
-                        height='30'
-                        alt='Cart'
-                      />
-                      {count > 0 && (
-                        <CartBadge aria-label={`${count} items in cart`}>
-                          {count}
-                        </CartBadge>
-                      )}
-                    </Link>
-                  </CartItem>
-                )}
+                <CartItem>
+                  <Link to='/cart' aria-label='Cart'>
+                    <img
+                      src='/images/cart.png'
+                      width='30'
+                      height='30'
+                      alt='Cart'
+                    />
+                    {count > 0 && (
+                      <CartBadge aria-label={`${count} items in cart`}>
+                        {count}
+                      </CartBadge>
+                    )}
+                  </Link>
+                </CartItem>
               </ul>
             </Nav>
 

@@ -1,18 +1,22 @@
 // firestore:src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { createContext, useEffect, useState } from 'react';
 import api from '../services/api';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 /**
- * Dev-friendly AuthProvider
- * - If a JWT token exists, it is primary.
- * - Otherwise, seeds from `initialUser` for local UI testing.
+ * Demo users — no backend required.
+ * Exported so the Login page can display credentials.
  */
-export function AuthProvider({ children, initialUser = null }) {
-  const [user, setUser] = useState(initialUser);
+export const DEMO_USERS = [
+  { name: 'Jane Doe', email: 'jane@example.com', password: 'password123' },
+  { name: 'John Doe', email: 'john@example.com', password: 'password123' },
+];
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,34 +29,32 @@ export function AuthProvider({ children, initialUser = null }) {
       } catch {
         localStorage.removeItem('token');
         delete api.defaults.headers.common['Authorization'];
-        setUser(initialUser || null);
-      } finally {
-        setLoading(false);
+        setUser(null);
       }
-    } else {
-      // no token → use the provided initialUser
-      setUser(initialUser || null);
-      setLoading(false);
     }
-    
-  }, [initialUser]);
+    setLoading(false);
+  }, []);
+
+  /** Authenticate against the demo user list (no backend needed). */
+  function demoLogin({ email, password }) {
+    const found = DEMO_USERS.find(
+      (u) => u.email === email && u.password === password
+    );
+    if (!found) {
+      throw new Error('Invalid email or password');
+    }
+    setUser({ name: found.name, email: found.email });
+    return found;
+  }
 
   async function register({ name, email, password }) {
-    const { data } = await api.post('/auth/register', {
-      name,
-      email,
-      password,
-    });
-    localStorage.setItem('token', data.token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(jwtDecode(data.token));
+    // Demo mode: skip API call and set user directly
+    setUser({ name, email });
   }
 
   async function login({ email, password }) {
-    const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', data.token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(jwtDecode(data.token));
+    // Demo mode: skip API call and use demo logic
+    demoLogin({ email, password });
   }
 
   async function loginWithGoogle(googleToken) {

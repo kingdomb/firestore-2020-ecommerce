@@ -1,5 +1,5 @@
 // firestore:src/components/Hero.jsx
-import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export default function Hero() {
@@ -18,7 +18,7 @@ export default function Hero() {
               <br />
               Be The Best!” – Brian Tracy
             </Text>
-            <Button href='/products'>Explore Now →</Button>
+            <Button to='/products'>Explore Now →</Button>
           </Col2>
           <Col2>
             <img src='/images/image1.png' alt='Hero' />
@@ -71,7 +71,7 @@ const Text = styled.p`
   line-height: 1.5;
 `;
 
-const Button = styled.a`
+const Button = styled(Link)`
   display: inline-block;
   background: #ff523b;
   color: #fff;

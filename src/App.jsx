@@ -1,20 +1,19 @@
 // firestore:src/App.jsx
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Home from './pages/Home';
-import Products from './pages/Products';
-import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import Account from './pages/Account';
-import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Contact from './pages/Contact';
-import NotFound from './pages/NotFound'
-import ProtectedRoute from './components/ProtectedRoute';
+import { Route, Routes } from 'react-router-dom';
 import Footer from './components/Footer';
+import Header from './components/Header';
+import ProtectedRoute from './components/ProtectedRoute';
 import { CartProvider } from './context/CartContext';
+import Account from './pages/Account';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Contact from './pages/Contact';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+import ProductDetails from './pages/ProductDetails';
+import Products from './pages/Products';
+import Register from './pages/Register';
 
 export default function App() {
   return (
@@ -28,11 +27,11 @@ export default function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='/contact' element={<Contact />} />
+        <Route path='/cart' element={<Cart />} />
         <Route path='*' element={<NotFound />} />
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path='/cart' element={<Cart />} />
           <Route path='/account' element={<Account />} />
           <Route path='/checkout' element={<Checkout />} />
         </Route>
