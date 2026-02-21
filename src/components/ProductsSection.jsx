@@ -1,7 +1,7 @@
 // src/components/ProductsSection.jsx
-import React from 'react';
+import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 
 function Stars({ rating = 0 }) {
   const full = Math.floor(rating);
@@ -29,11 +29,11 @@ export default function ProductsSection({ title, products }) {
         <Grid>
           {products.map((p) => (
             <Card key={p.id}>
-              <a href={`/products/${p.id}`}>
+              <Link to={`/products/${p.id}`}>
                 <img src={p.src} alt={p.title} />
-              </a>
+              </Link>
               <h4>
-                <a href={`/products/${p.id}`}>{p.title}</a>
+                <Link to={`/products/${p.id}`}>{p.title}</Link>
               </h4>
               <Stars rating={p.rating} />
               <p>{p.price}</p>
@@ -97,6 +97,8 @@ const Card = styled.div`
 
   img {
     width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
     display: block;
   }
 

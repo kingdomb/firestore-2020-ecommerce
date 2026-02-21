@@ -1,10 +1,11 @@
 // firestore:src/pages/ProductDetails.jsx
-import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { useParams, Link } from 'react-router-dom';
-import { FaIndent, FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
-import products from '../data/products';
-import { useCart } from '../hooks/useCart';
+import { useMemo, useState } from 'react'
+import { FaIndent, FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
+import { Link, useParams } from 'react-router-dom'
+import styled from 'styled-components'
+import { useToast } from '../context/ToastContext'
+import products from '../data/products'
+import { useCart } from '../hooks/useCart'
 
 function Stars({ rating = 0 }) {
   const full = Math.floor(rating);
@@ -26,6 +27,7 @@ function Stars({ rating = 0 }) {
 export default function ProductDetails() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { addToast } = useToast();
 
   const product = useMemo(() => {
     const found = products.find((p) => String(p.id) === String(id));
@@ -43,6 +45,13 @@ export default function ProductDetails() {
     setQty(n);
   };
 
+  const [selectedSize, setSelectedSize] = useState('');
+  const [sizeError, setSizeError] = useState(false);
+
+  // Determine if product needs size (skip for watches, socks, etc)
+  const needsSize = product && !/(watch|socks)/i.test(product.title);
+  const isShoes = product && /shoes/i.test(product.title);
+
   // TODO replace with real gallery paths later
   const smallImages = [
     product?.src || '/images/product-1.jpg',
@@ -50,6 +59,15 @@ export default function ProductDetails() {
     '/images/gallery-3.jpg',
     '/images/gallery-4.jpg',
   ];
+
+  const isPlaceholder = (src) => {
+    if (String(product?.id) === '1') return false;
+    return (
+      src.includes('gallery-2.jpg') ||
+      src.includes('gallery-3.jpg') ||
+      src.includes('gallery-4.jpg')
+    );
+  };
 
   // pick four related items (anything with a different id)
   const related = useMemo(
@@ -59,21 +77,33 @@ export default function ProductDetails() {
 
   // Add to cart click handler (no navigation)
   const handleAddToCart = () => {
+    if (needsSize && !selectedSize) {
+      setSizeError(true);
+      return;
+    }
+    setSizeError(false);
+
     // ensure numeric price for cart math
     const price =
       typeof product.price === 'number'
         ? product.price
         : parseFloat(String(product.price || '0').replace(/[^0-9.]/g, '')) || 0;
 
+    // Use variant ID so different sizes of the same product don't merge
+    const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+    const cartItemTitle = selectedSize ? `${product.title} - ${selectedSize}` : product.title;
+
     addItem(
       {
-        id: product.id,
-        title: product.title,
+        id: cartItemId,
+        title: cartItemTitle,
         price,
         src: product.src,
       },
       qty
     );
+    
+    addToast(`Added ${qty} ${qty === 1 ? 'item' : 'items'} to your cart`);
   };
 
   return (
@@ -82,19 +112,40 @@ export default function ProductDetails() {
         <SingleProductWrapper>
           <Row>
             <Col2>
-              <MainImage
-                src={mainImg}
-                alt={product?.title || 'Product'}
-                id='ProductImg'
-              />
+              <ImageWrapper>
+                <MainImage
+                  src={mainImg}
+                  alt={product?.title || 'Product'}
+                  id='ProductImg'
+                />
+                {isPlaceholder(mainImg) && (
+                  <PlaceholderOverlay>
+                    <svg viewBox='0 0 300 50'>
+                      <text x='50%' y='50%' textAnchor='middle' dominantBaseline='middle' fill='black' fontWeight='bold' fontSize='28'>
+                        Placeholder image
+                      </text>
+                    </svg>
+                  </PlaceholderOverlay>
+                )}
+              </ImageWrapper>
               <SmallImgRow>
                 {smallImages.map((src, idx) => (
-                  <SmallImgCol key={idx}>
-                    <SmallImage
-                      src={src}
-                      alt={`Thumbnail ${idx + 1}`}
-                      onClick={() => setMainImg(src)}
-                    />
+                  <SmallImgCol key={idx} onClick={() => setMainImg(src)}>
+                    <ImageWrapper>
+                      <SmallImage
+                        src={src}
+                        alt={`Thumbnail ${idx + 1}`}
+                      />
+                      {isPlaceholder(src) && (
+                        <PlaceholderOverlay>
+                          <svg viewBox='0 0 300 50'>
+                            <text x='50%' y='50%' textAnchor='middle' dominantBaseline='middle' fill='black' fontWeight='bold' fontSize='28'>
+                              Placeholder image
+                            </text>
+                          </svg>
+                        </PlaceholderOverlay>
+                      )}
+                    </ImageWrapper>
                   </SmallImgCol>
                 ))}
               </SmallImgRow>
@@ -108,14 +159,39 @@ export default function ProductDetails() {
               <ProductTitle>{product?.title || 'Product Title'}</ProductTitle>
               <Price>{product?.price || '$0.00'}</Price>
 
-              <Select aria-label='Select size'>
-                <option>Select Size</option>
-                <option>XXL</option>
-                <option>XL</option>
-                <option>Large</option>
-                <option>Medium</option>
-                <option>Small</option>
-              </Select>
+              {needsSize && (
+                <>
+                  <Select 
+                    aria-label='Select size'
+                    value={selectedSize}
+                    onChange={(e) => {
+                      setSelectedSize(e.target.value);
+                      if (e.target.value) setSizeError(false);
+                    }}
+                    $hasError={sizeError}
+                  >
+                    <option value=''>Select Size</option>
+                    {isShoes ? (
+                      <>
+                        <option value='8'>8</option>
+                        <option value='9'>9</option>
+                        <option value='10'>10</option>
+                        <option value='11'>11</option>
+                        <option value='12'>12</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value='XXL'>XXL</option>
+                        <option value='XL'>XL</option>
+                        <option value='Large'>Large</option>
+                        <option value='Medium'>Medium</option>
+                        <option value='Small'>Small</option>
+                      </>
+                    )}
+                  </Select>
+                  {sizeError && <ErrorText>Please select a size before adding to cart.</ErrorText>}
+                </>
+              )}
 
               <QuantityInput
                 type='number'
@@ -201,6 +277,29 @@ const Col2 = styled.div`
   }
 `;
 
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const PlaceholderOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.3);
+
+  svg {
+    width: 90%;
+    height: auto;
+  }
+`;
+
 const MainImage = styled.img`
   width: 100%;
   display: block;
@@ -220,6 +319,8 @@ const SmallImgCol = styled.div`
 
 const SmallImage = styled.img`
   width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
   display: block;
 `;
 
@@ -246,6 +347,23 @@ const Select = styled.select`
   display: block;
   padding: 10px;
   margin-top: 20px;
+  border: 1px solid ${({ $hasError }) => ($hasError ? '#dc2626' : '#ccc')};
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 15px;
+
+  &:focus {
+    outline: none;
+    border-color: #ff523b;
+  }
+`;
+
+const ErrorText = styled.p`
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 6px;
+  margin-bottom: 0;
+  font-weight: 500;
 `;
 
 const QuantityInput = styled.input`
@@ -266,7 +384,7 @@ const AddButton = styled.button`
   background: #ff523b;
   color: #fff;
   padding: 8px 30px;
-  margin: 10px 0;
+  margin: 10px 0 10px 12px;
   border-radius: 30px;
   border: none;
   cursor: pointer;
@@ -334,6 +452,8 @@ const Card = styled.div`
 
   img {
     width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
     display: block;
   }
 

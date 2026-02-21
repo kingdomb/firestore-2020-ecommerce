@@ -1,5 +1,5 @@
 // firesstore:/src/components/home/Offer.jsx
-import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export default function Offer({
@@ -23,7 +23,7 @@ export default function Offer({
             <H1>{title}</H1>
             <Small>{copy}</Small>
             <br />
-            <Button href={ctaHref}>{ctaText}</Button>
+            <Button to={ctaHref}>{ctaText}</Button>
           </Col2>
         </Row>
       </SmallContainer>
@@ -84,7 +84,7 @@ const Small = styled.small`
   display: inline-block;
 `;
 
-const Button = styled.a`
+const Button = styled(Link)`
   display: inline-block;
   background: #ff523b;
   color: #fff;

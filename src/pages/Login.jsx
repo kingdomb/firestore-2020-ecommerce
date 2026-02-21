@@ -1,34 +1,47 @@
 // firestore:src/pages/Login.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  Input,
-  PasswordInput,
-  Field,
-  Label,
-  ErrorText,
+    ErrorText,
+    Field,
+    Input,
+    Label,
+    PasswordInput,
 } from '../components/forms/Input';
-// import { useAuth } from '../hooks/useAuth';
+import { DEMO_USERS } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
-  // const { login } = useAuth();
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   // simple inline errors
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [loginError, setLoginError] = useState('');
 
   const onChangeEmail = (e) => {
     setEmail(e.target.value);
     if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+    if (loginError) setLoginError('');
   };
 
   const onChangePassword = (e) => {
     setPassword(e.target.value);
     if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+    if (loginError) setLoginError('');
   };
 
-  const handleSubmit = (e) => {
+  const fillCredentials = (user) => {
+    setEmail(user.email);
+    setPassword(user.password);
+    setErrors({ email: '', password: '' });
+    setLoginError('');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const next = {};
@@ -40,7 +53,12 @@ export default function Login() {
     setErrors({ email: next.email || '', password: next.password || '' });
     if (Object.keys(next).length) return;
 
-    // login({ email, password });
+    try {
+      await login({ email, password });
+      navigate('/');
+    } catch (err) {
+      setLoginError(err.message || 'Invalid email or password');
+    }
   };
 
   return (
@@ -82,15 +100,31 @@ export default function Login() {
             {errors.password && <ErrorText>{errors.password}</ErrorText>}
           </Field>
 
+          {loginError && <LoginErrorText>{loginError}</LoginErrorText>}
+
           <Actions>
             <Button type='submit'>Log In</Button>
           </Actions>
         </Form>
 
         <Alt>
-          New here? <a href='/register'>Create an account</a>
+          New here? <Link to='/register'>Create an account</Link>
         </Alt>
       </Card>
+
+      {/* Demo credentials card */}
+      <DemoCard>
+        <DemoTitle>Demo Accounts</DemoTitle>
+        <DemoHint>Click a profile to auto-fill the login form.</DemoHint>
+        {DEMO_USERS.map((u) => (
+          <DemoUser key={u.email} onClick={() => fillCredentials(u)}>
+            <DemoName>{u.name}</DemoName>
+            <DemoDetail>
+              {u.email} &nbsp;/&nbsp; {u.password}
+            </DemoDetail>
+          </DemoUser>
+        ))}
+      </DemoCard>
     </PageWrap>
   );
 }
@@ -99,9 +133,12 @@ export default function Login() {
 const PageWrap = styled.section`
   background: radial-gradient(#fff, #ffd6d6);
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 40px 16px;
+  gap: 16px;
 `;
 
 const Card = styled.div`
@@ -163,4 +200,75 @@ const Alt = styled.p`
   a:hover {
     text-decoration: underline;
   }
+`;
+
+const LoginErrorText = styled.p`
+  color: #e02424;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(224, 36, 36, 0.08);
+  border: 1px solid rgba(224, 36, 36, 0.2);
+  border-radius: 10px;
+  padding: 8px 12px;
+`;
+
+/* Demo credentials card */
+const DemoCard = styled.div`
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  border-top: 3px solid #ff523b;
+`;
+
+const DemoTitle = styled.h3`
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const DemoHint = styled.p`
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 12px;
+`;
+
+const DemoUser = styled.button`
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: #fff3f1;
+    border-color: #ff523b;
+  }
+`;
+
+const DemoName = styled.span`
+  display: block;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+`;
+
+const DemoDetail = styled.span`
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
 `;

@@ -1,7 +1,8 @@
 // firestore:src/pages/Products.jsx
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 import productsData from '../data/products';
 
 function Stars({ rating = 0 }) {
@@ -85,11 +86,11 @@ export default function Products() {
         <Grid>
           {current.map((p) => (
             <Card key={p.id}>
-              <a href={`/products/${p.id}`}>
+              <Link to={`/products/${p.id}`}>
                 <img src={p.src} alt={p.title} />
-              </a>
+              </Link>
               <h4>
-                <a href={`/products/${p.id}`}>{p.title}</a>
+                <Link to={`/products/${p.id}`}>{p.title}</Link>
               </h4>
               <Stars rating={p.rating} />
               <Price>{p.price}</Price>
@@ -178,6 +179,8 @@ const Card = styled.div`
 
   img {
     width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
     display: block;
   }
 

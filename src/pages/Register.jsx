@@ -1,12 +1,13 @@
 // firestore:src/pages/Register.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  Input,
-  PasswordInput,
-  Field,
-  Label,
-  ErrorText,
+    ErrorText,
+    Field,
+    Input,
+    Label,
+    PasswordInput,
 } from '../components/forms/Input';
 // import { useAuth } from '../hooks/useAuth';
 
@@ -57,6 +58,9 @@ export default function Register() {
         <Sub>Join FireStore in seconds</Sub>
 
         <Form onSubmit={handleSubmit} noValidate>
+          <DemoWarning>
+            <strong>Note:</strong> Registration is disabled for this demo. Please use the <Link to="/login">Demo Accounts</Link> to log in.
+          </DemoWarning>
           <Field>
             <Label htmlFor='name' $required>
               Name
@@ -141,7 +145,7 @@ export default function Register() {
         </Form>
 
         <Alt>
-          Already have an account? <a href='/login'>Log in</a>
+          Already have an account? <Link to='/login'>Log in</Link>
         </Alt>
       </Card>
     </PageWrap>
@@ -216,6 +220,26 @@ const Alt = styled.p`
     color: #ff523b;
     text-decoration: none;
   }
+  a:hover {
+    text-decoration: underline;
+  }
+`;
+
+const DemoWarning = styled.div`
+  background: #fff3f1;
+  border-left: 4px solid #ff523b;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+
+  a {
+    color: #ff523b;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
   a:hover {
     text-decoration: underline;
   }

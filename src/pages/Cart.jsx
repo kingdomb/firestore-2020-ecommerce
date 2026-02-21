@@ -1,11 +1,22 @@
 // firestore:src/pages/Cart.jsx
-import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 
 export default function Cart() {
   const { items, updateQty, removeItem, subtotal, tax, total } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    if (user) {
+      navigate('/checkout');
+    } else {
+      navigate('/login', { state: { message: 'Please log in to checkout your cart.' } });
+    }
+  };
 
   const isEmpty = items.length === 0;
 
@@ -31,7 +42,7 @@ export default function Cart() {
                   <tr>
                     <TableHeader>Product</TableHeader>
                     <TableHeader>Quantity</TableHeader>
-                    <TableHeader align='right'>Subtotal</TableHeader>
+                    <TableHeader $align='right'>Subtotal</TableHeader>
                   </tr>
                 </thead>
                 <tbody>
@@ -64,7 +75,7 @@ export default function Cart() {
                         />
                       </TableCell>
 
-                      <TableCell align='right'>
+                      <TableCell $align='right'>
                         ${(it.price * it.qty).toFixed(2)}
                       </TableCell>
                     </tr>
@@ -89,7 +100,7 @@ export default function Cart() {
                   <strong>${total.toFixed(2)}</strong>
                 </SummaryRow>
 
-                <CheckoutButton as={Link} to='/checkout'>
+                <CheckoutButton onClick={handleCheckoutClick}>
                   Proceed to checkout →
                 </CheckoutButton>
               </SummaryCard>
@@ -143,7 +154,7 @@ const CartTable = styled.table`
 `;
 
 const TableHeader = styled.th`
-  text-align: ${({ align }) => align || 'left'};
+  text-align: ${({ $align }) => $align || 'left'};
   padding: 12px 10px;
   color: #fff;
   background: #ff523b;
@@ -180,7 +191,7 @@ const ResponsiveTableWrapper = styled.div`
       padding: 6px 0;
     }
 
-    ${TableCell}[align='right'] {
+    ${TableCell}:last-child {
       grid-column: 2 / 3;
       justify-self: end;
     }
@@ -205,7 +216,9 @@ const ProductImage = styled.img`
   width: 80px;
   height: 80px;
   border-radius: 12px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  background: #f9f9f9;
 `;
 
 const QuantityInput = styled.input`
